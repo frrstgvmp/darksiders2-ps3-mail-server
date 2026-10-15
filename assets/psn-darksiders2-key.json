@@ -1,0 +1,13 @@
+{
+  "curve": "secp192r1",
+  "hash": "SHA-1",
+  "identifier": "4ca0c71d",
+  "x": "398c13aa92917879c540bbc1a23ac96c702ba6edb38a796e",
+  "y": "9de4f4859896fa7bb05c821161da2a78f79e3bbafd90ff85",
+  "service_ids": [
+    "UP1005-BLUS30829_00"
+  ],
+  "provenance": "Recovered offline from three independently issued operator PSN tickets captured during original Darksiders II research; all signatures independently verified with cryptography.",
+  "trusted_samples": 3,
+  "verified_on": "2026-10-14"
+}

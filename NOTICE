@@ -1,0 +1,26 @@
+Russian translation: NOTICE.ru.md
+
+The MIT license applies to original project code and documentation.
+
+assets/thq-connect-root.pem is the public THQ Connect Root CA certificate
+extracted from the original Darksiders II PS3 1.02 client for interoperability.
+Its SHA-256 fingerprint over DER is:
+d86d20e06db3f01be90bb7743c1e799e776e12a09023ca5d327df8b94bf35029
+No THQ private CA key is included or known. No ownership or MIT licensing of
+this third-party certificate is claimed.
+
+Darksiders, THQ and PlayStation names are used to identify the compatible game
+and platform. This independent project is not endorsed by their owners.
+
+assets/psn-darksiders2-key.json contains a public ECDSA verification point for
+observed Darksiders II PSN tickets, identifier 4ca0c71d. It was recovered offline
+from three independently issued operator-owned signed tickets; no Sony private
+key is included or derived. The pinned key is used only to verify tickets.
+
+psn_auth.py is an independent Python implementation of the published NP ticket
+TLV/signature format. Protocol references:
+https://github.com/LBPUnion/ProjectLighthouse/blob/main/Documentation/Tickets.md
+https://github.com/LBPUnion/ProjectLighthouse/pull/600
+The LittleBigRefresh/NPTicket implementation was consulted as a format reference;
+no third-party implementation or AGPL source is copied/bundled in this release.
+No ownership or MIT licensing of Sony's verification key is claimed.

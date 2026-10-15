@@ -1,0 +1,15 @@
+research/
+.venv/
+__pycache__/
+_private/
+runtime/
+dist/
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.key
+*.pcap
+*.pcapng
+config.json
+pki/

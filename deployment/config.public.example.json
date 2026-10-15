@@ -1,0 +1,26 @@
+{
+  "listen": "203.0.113.10",
+  "public_ip": "203.0.113.10",
+  "allowed_clients": [],
+  "dns_upstream": "1.1.1.1",
+  "dns_port": 53,
+  "dns_ports": [
+    53
+  ],
+  "https_ports": [
+    443,
+    8443
+  ],
+  "redirect_hosts": [
+    "ds2.gds.thqconnect.com",
+    "thqc-darksiders2-ps3-na.thqconnect.com"
+  ],
+  "cloud_cert": "pki/cloud-fullchain.pem",
+  "cloud_key": "pki/cloud.key",
+  "gds_cert": null,
+  "gds_key": null,
+  "state_dir": "/var/lib/darksiders2-server",
+  "capture_raw": false,
+  "public_mode": true,
+  "verify_psn_tickets": true
+}

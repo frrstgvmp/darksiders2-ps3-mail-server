@@ -1,0 +1,14 @@
+[Unit]
+Description=Backup Darksiders II mail database
+
+[Service]
+Type=oneshot
+User=ds2-server
+Group=ds2-server
+ExecStart=/usr/bin/python3 /opt/darksiders2-server/backup_database.py --database /var/lib/darksiders2-server/cloud.sqlite3 --out /var/lib/darksiders2-server/backups --keep 14
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/darksiders2-server
+PrivateTmp=true

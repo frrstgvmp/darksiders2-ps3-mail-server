@@ -1,0 +1,32 @@
+[Unit]
+Description=Darksiders II private mail server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ds2-server
+Group=ds2-server
+WorkingDirectory=/opt/darksiders2-server
+ExecStart=/usr/bin/python3 /opt/darksiders2-server/ds2_server.py --config /etc/darksiders2-server/config.json
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+StateDirectory=darksiders2-server
+StateDirectoryMode=0700
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/darksiders2-server
+RestrictAddressFamilies=AF_INET AF_UNIX
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
