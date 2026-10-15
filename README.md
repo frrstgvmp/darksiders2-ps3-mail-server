@@ -1,7 +1,5 @@
 # Darksiders II PS3 Mail Server
 
-[Русский](README.ru.md)
-
 Self-hosted THQ Connect mailbox service for Darksiders II on PS3 OFW.
 DNS redirection, signed PSN ticket verification and persistent gift storage.
 

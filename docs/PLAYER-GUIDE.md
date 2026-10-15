@@ -1,7 +1,5 @@
 # Player setup
 
-**English** · [Русский](PLAYER-GUIDE.ru.md)
-
 Server IPv4: **193.232.178.202**. Updated: 2026-10-15.
 [OFW compatibility](COMPATIBILITY.md).
 

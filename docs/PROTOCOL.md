@@ -1,7 +1,5 @@
 # Mailbox protocol and implementation
 
-**English** · [Русский](PROTOCOL.ru.md)
-
 This document describes the implemented subset, not a complete THQ Connect specification. Examples use dummy profile names and omit authentication tickets.
 
 ## Routing and transport

@@ -1,7 +1,5 @@
 # OFW compatibility
 
-**English** · [Русский](COMPATIBILITY.ru.md)
-
 Updated: 2026-10-15. Results are player-reported unless specified otherwise.
 
 | Edition | Disc / TITLE_ID | Mailbox | Sending / inventory receipt | Pay It Forward |

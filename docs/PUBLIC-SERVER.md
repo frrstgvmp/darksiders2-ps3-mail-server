@@ -1,7 +1,5 @@
 # Public hosting and authenticated mailbox access
 
-**English** · [Русский](PUBLIC-SERVER.ru.md)
-
 ## Modes
 
 `public_mode:true` accepts all source IPv4 addresses without registration. Every cloud request must contain one valid, unexpired signed PSN ticket. `allowed_clients` is ignored for access in this mode; it may be retained for rollback. `capture_raw:true` is rejected. Use [config.public.example.json](../deployment/config.public.example.json), replace example addresses and provide local TLS material.

@@ -1,7 +1,5 @@
 # Deployment
 
-**English** · [Русский](README.ru.md)
-
 Target: Debian 13, Python 3.10+, systemd, public IPv4.
 Dependency: `python3-cryptography`.
 

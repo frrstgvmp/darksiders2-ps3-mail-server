@@ -8,7 +8,7 @@ Source pre-release for the Darksiders II PS3 THQ Connect mailbox service.
 - Persistent SQLite gift maps, per-entry sender metadata and atomic batches.
 - Owner-only reads/deletes; signed cross-profile append; quotas and rate limits.
 - Separate `TomeGiftJP` support; Japanese OFW verification pending.
-- Debian/systemd installer, daily backups, English/Russian documentation.
+- Debian/systemd installer, daily backups, English documentation.
 
 OFW/BLES01597: players reported mailbox access, sending, inventory receipt
 and Pay It Forward. Exact firmware/update values were not recorded.

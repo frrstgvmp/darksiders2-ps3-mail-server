@@ -1,7 +1,5 @@
 # GitHub release procedure
 
-**English** · [Русский](PUBLISHING.ru.md)
-
 - Account: `frrstgvmp`
 - Repository: `darksiders2-ps3-mail-server`
 - Candidate tag: `v0.4.6`
@@ -47,7 +45,7 @@ credentials in remote URLs or files. See [GitHub's source import guide](https://
 ## Release
 
 Create a draft release targeting the reviewed commit on `main`, tag `v0.4.6`.
-Use [release notes](RELEASE-v0.4.6.md) or the [Russian version](RELEASE-v0.4.6.ru.md).
+Use the [release notes](RELEASE-v0.4.6.md).
 Mark the initial release as a pre-release while independent installation and
 additional OFW editions remain pending. Attach:
 

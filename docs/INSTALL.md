@@ -1,7 +1,5 @@
 # Installation
 
-**English** · [Русский](INSTALL.ru.md)
-
 Requirements: Debian 13, Python 3.10+, `python3-cryptography`, systemd, public
 IPv4. Ports: UDP/TCP 53, TCP 443/8443. Optional additional DNS: UDP/TCP 1053.
 

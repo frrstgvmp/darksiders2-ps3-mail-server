@@ -1,7 +1,5 @@
 # Verification status
 
-**English** · [Русский](STATUS.ru.md)
-
 Updated: 2026-10-15. Scope: PS3 OFW. [Editions](COMPATIBILITY.md).
 
 ## Recorded OFW result
