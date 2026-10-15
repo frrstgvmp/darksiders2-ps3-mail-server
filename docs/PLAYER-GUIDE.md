@@ -6,12 +6,13 @@ Server IPv4: **193.232.178.202**. Updated: 2026-10-15.
 [OFW compatibility](COMPATIBILITY.md).
 
 1. Keep the existing IP, subnet and working gateway.
-2. Set primary and secondary DNS to `193.232.178.202`.
+2. Set primary DNS to `193.232.178.202`; secondary DNS may be `1.1.1.1`.
 3. No proxy is required. Sign in to PSN and restart the game.
 4. Open the network inbox in the Tome.
 
-Both players must use this server. A general-purpose secondary DNS can return
-the former service address. Keep both DNS entries identical.
+Both players must use this server. Primary `193.232.178.202` with secondary
+`1.1.1.1` has been reported working. Using the server address for both DNS
+entries is also an option.
 
 For sending, select a recipient, select an item and execute **Add item to gift**.
 Verify the attachment before sending. Message text is optional. Check that the

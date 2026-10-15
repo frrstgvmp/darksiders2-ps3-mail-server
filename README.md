@@ -17,7 +17,7 @@ saves or invoke trophy APIs. Trophy handling remains in the game.
 
 ## Connect
 
-1. Set both PS3 DNS addresses to **193.232.178.202**.
+1. Set primary PS3 DNS to **193.232.178.202**. Secondary DNS can be **1.1.1.1**; this combination has been reported working.
 2. Keep the working gateway. Disable any unnecessary network proxy.
 3. Sign in to PSN and restart Darksiders II.
 4. Open the network inbox. Both participants must use this server.
