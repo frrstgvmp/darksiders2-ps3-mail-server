@@ -61,7 +61,7 @@ Debian 13, Python 3.10+, systemd, публичный IPv4 и `python3-cryptograp
 - [Результаты проверок](docs/STATUS.ru.md)
 - [Порядок публикации](docs/PUBLISHING.ru.md)
 - [Устройство сервера](docs/HOW-IT-WORKS.ru.md)
-- [Безопасность](SECURITY.ru.md), [разработка](CONTRIBUTING.ru.md), [сторонние материалы](NOTICE.ru.md)
+- [Сторонние материалы](docs/NOTICE.ru.md), [перевод лицензии](docs/LICENSE.ru.md)
 
 ## Проверки
 
@@ -76,5 +76,5 @@ python3 -m unittest discover -s tests -v
 совместимость OFW.
 
 Код и документация проекта — MIT. Происхождение сторонних материалов —
-[NOTICE.ru.md](NOTICE.ru.md). Независимый проект, не связан с Sony или THQ Nordic.
+[NOTICE.ru.md](docs/NOTICE.ru.md). Независимый проект, не связан с Sony или THQ Nordic.
 Одобрение PSNProfiles не получено.

@@ -60,7 +60,7 @@ private keys, player databases or game files.
 - [Compatibility](docs/COMPATIBILITY.md)
 - [Verification status](docs/STATUS.md)
 - [Release procedure](docs/PUBLISHING.md)
-- [Security](SECURITY.md), [contributing](CONTRIBUTING.md), [third-party notices](NOTICE)
+- [Third-party notices](NOTICE)
 
 ## Validation
 

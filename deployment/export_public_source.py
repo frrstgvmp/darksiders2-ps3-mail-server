@@ -9,7 +9,7 @@ import tarfile
 
 BASE = Path(__file__).resolve().parents[1]
 FILES = (
-    'VERSION', 'README.md', 'README.ru.md', 'LICENSE', 'NOTICE', 'SECURITY.md', 'CONTRIBUTING.md', '.gitignore',
+    'VERSION', 'README.md', 'README.ru.md', 'LICENSE', 'NOTICE', '.gitignore',
     'ds2_server.py', 'cloud_api.py', 'dns_probe.py', 'lab_server.py', 'access_control.py',
     'psn_auth.py', 'service_limits.py', 'assets/psn-darksiders2-key.json',
     'generate_server_certificates.py', 'backup_database.py', 'vps_bridge.py', 'configure_vps_direct.py', 'assets/thq-connect-root.pem',
@@ -25,7 +25,7 @@ FILES = (
     'docs/HOW-IT-WORKS.ru.md',
     'docs/INSTALL.ru.md', 'docs/PROTOCOL.ru.md', 'docs/PUBLIC-SERVER.ru.md',
     'docs/PUBLISHING.ru.md', 'docs/STATUS.ru.md', 'deployment/README.ru.md',
-    'CONTRIBUTING.ru.md', 'SECURITY.ru.md', 'NOTICE.ru.md', 'LICENSE.ru.md',
+    'docs/NOTICE.ru.md', 'docs/LICENSE.ru.md',
 )
 
 
