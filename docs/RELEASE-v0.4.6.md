@@ -3,6 +3,7 @@
 Source pre-release for the Darksiders II PS3 THQ Connect mailbox service.
 
 - DNS redirection for configured THQ hosts, UDP/TCP DNS.
+- Primary DNS `193.232.178.202`; secondary `1.1.1.1` is a reported working configuration.
 - HTTPS Cloud API with PSN ticket signature and lifetime verification.
 - Persistent SQLite gift maps, per-entry sender metadata and atomic batches.
 - Owner-only reads/deletes; signed cross-profile append; quotas and rate limits.
