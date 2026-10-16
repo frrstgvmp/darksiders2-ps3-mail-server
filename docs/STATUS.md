@@ -1,6 +1,6 @@
 # Verification status
 
-Updated: 2026-10-15. Scope: PS3 OFW. [Editions](COMPATIBILITY.md).
+Updated: 2026-10-16. Scope: recorded OFW results and client protocol checks. [Editions](COMPATIBILITY.md).
 
 ## Recorded OFW result
 
@@ -21,6 +21,15 @@ The exact request triggering the trophy was not recorded. Console state is
 player-reported, not independently attested. No universal firmware or region
 compatibility is claimed.
 
+## US BLUS30829 client check — 2026-10-16
+
+Mounted game metadata and native save folders identified BLUS30829.
+At 08:10:49 UTC, GET/GET for TomeGift and GameToWeb returned HTTP 200.
+At 08:14:44 UTC, MAP_GET/TomeGift returned HTTP 200 with a 51-byte response.
+TLS 1.2 / AES256-SHA256 completed and mandatory PSN ticket verification passed.
+This records connection and mailbox reading. Clean OFW verification, gift
+sending/receipt and a fresh trophy result are still pending for BLUS30829.
+
 ## Implementation verification
 
 33 automated tests passed for the release candidate. Coverage includes signed
@@ -37,7 +46,7 @@ separate client check. The internal reason for client acceptance is unresolved.
 ## Pending
 
 - Exact OFW and game update numbers for the recorded result.
-- Japanese BLJS10199, Asian and US editions on OFW.
+- Japanese BLJS10199 and US BLUS30829 on clean OFW.
 - Repeated delivery/claim/restart scenarios on OFW.
 - Fresh trophy capture correlating the game UI with the server request.
 - Independent clean deployment from the public release.
