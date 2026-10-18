@@ -173,18 +173,95 @@ class JapaneseProtectedMailTests(ProtectedMailTests):
 
 
 class PublicDnsTests(unittest.IsolatedAsyncioTestCase):
-    async def test_unlisted_client_can_resolve_game_but_not_arbitrary_dns(self):
-        args=SimpleNamespace(public_mode=True,listen='127.0.0.1',client=None,allowed_clients=[],
+    def setUp(self):
+        self.args=SimpleNamespace(public_mode=True,listen='127.0.0.1',client=None,allowed_clients=[],
             redirect_ip='203.0.113.10',redirect_host=['thqc-darksiders2-ps3-na.thqconnect.com'],
             upstream='127.0.0.53',upstream_port=53,event_sink=lambda **kwargs:None)
-        probe=Probe(args)
-        def question(name,kind=1):return struct.pack('!6H',17,256,1,0,0,0)+b''.join(bytes([len(x)])+x.encode() for x in name.split('.'))+b'\0'+struct.pack('!HH',kind,1)
+        self.probe=Probe(self.args)
+
+    @staticmethod
+    def question(name,kind=1,klass=1):
+        return struct.pack('!6H',17,256,1,0,0,0)+b''.join(bytes([len(x)])+x.encode() for x in name.split('.'))+b'\0'+struct.pack('!HH',kind,klass)
+
+    async def test_game_redirect_and_ipv6_nodata_do_not_use_upstream(self):
         peer='198.51.100.222'
-        reply=await probe.answer(question('thqc-darksiders2-ps3-na.thqconnect.com'),peer)
-        self.assertEqual(reply[-4:],bytes([203,0,113,10]))
-        with patch('dns_probe.forward',side_effect=AssertionError('Must not resolve arbitrary Internet names')):
-            self.assertEqual((await probe.answer(question('example.org'),peer))[3]&15,5)
-            self.assertEqual((await probe.answer(question('playstation.net',255),peer))[3]&15,5)
+        with patch('dns_probe.forward',side_effect=AssertionError('Redirect must stay local')):
+            reply=await self.probe.answer(self.question('thqc-darksiders2-ps3-na.thqconnect.com'),peer)
+            self.assertEqual(reply[-4:],bytes([203,0,113,10]))
+            reply=await self.probe.answer(self.question('thqc-darksiders2-ps3-na.thqconnect.com',28),peer)
+            self.assertEqual(struct.unpack_from('!HH',reply,4),(1,0))
+            self.assertEqual(reply[3]&15,0)
+
+    async def test_general_address_reverse_and_other_record_queries_forward_unchanged(self):
+        # Include Windows nslookup's reverse lookup and names outside PSN zones.
+        for name,kind in [('example.org',1),('example.org',28),
+                          ('202.178.232.193.in-addr.arpa',12),
+                          ('example.org',16),('_service._tcp.example.org',33),
+                          ('www.playstation.com',1)]:
+            packet=self.question(name,kind)
+            expected=packet[:2]+struct.pack('!5H',0x8183,1,0,0,0)+packet[12:]
+            with self.subTest(name=name,kind=kind), patch('dns_probe.forward',return_value=expected) as forward:
+                self.assertEqual(await self.probe.answer(packet,'198.51.100.222'),expected)
+                forward.assert_called_once_with(packet,self.args.upstream,self.args.upstream_port)
+
+    async def test_meta_queries_non_in_class_and_rate_excess_do_not_forward(self):
+        with patch('dns_probe.forward',side_effect=AssertionError('Query must be refused locally')):
+            for kind in (0,41,249,250,251,252,253,254,255):
+                self.assertEqual((await self.probe.answer(self.question('example.org',kind),'198.51.100.222'))[3]&15,5)
+            self.assertEqual((await self.probe.answer(self.question('example.org',1,3),'198.51.100.222'))[3]&15,5)
+            self.probe.rate=RateLimit(1,1,10,10)
+            await self.probe.answer(self.question('example.org',255),'198.51.100.222')
+            self.assertIsNone(await self.probe.answer(self.question('example.org'),'198.51.100.222'))
+
+    async def test_udp_forwarding_and_truncated_reply_tcp_retry(self):
+        loop=asyncio.get_running_loop()
+        queries=[]
+        def response(packet):
+            kind=struct.unpack_from('!H',packet,len(packet)-4)[0]
+            payload=(b'\xe5'+b'x'*229)*3 if kind==16 else bytes([192,0,2,25])
+            return (packet[:2]+struct.pack('!5H',0x8180,1,1,0,0)+packet[12:]
+                    +b'\xc0\x0c'+struct.pack('!HHIH',kind,1,60,len(payload))+payload)
+        class Upstream(asyncio.DatagramProtocol):
+            def connection_made(self,transport):self.transport=transport
+            def datagram_received(self,packet,address):
+                queries.append(packet)
+                self.transport.sendto(response(packet),address)
+        class Client(asyncio.DatagramProtocol):
+            def __init__(self):self.received=asyncio.Queue()
+            def datagram_received(self,packet,address):self.received.put_nowait(packet)
+        upstream,_=await loop.create_datagram_endpoint(Upstream,local_addr=('127.0.0.1',0))
+        self.args.upstream='127.0.0.1'
+        self.args.upstream_port=upstream.get_extra_info('sockname')[1]
+        tcp=await asyncio.start_server(self.probe.tcp,'127.0.0.1',0)
+        address=tcp.sockets[0].getsockname()
+        udp,protocol=await loop.create_datagram_endpoint(lambda:UDP(self.probe),local_addr=address)
+        client,received=await loop.create_datagram_endpoint(Client,local_addr=('127.0.0.1',0))
+        writer=None
+        try:
+            packet=self.question('example.org')
+            client.sendto(packet,address)
+            self.assertEqual(await asyncio.wait_for(received.received.get(),2),response(packet))
+            large=self.question('example.org',16)
+            client.sendto(large,address)
+            truncated=await asyncio.wait_for(received.received.get(),2)
+            self.assertLessEqual(len(truncated),512)
+            self.assertTrue(truncated[2]&2)
+            self.assertEqual(struct.unpack_from('!HH',truncated,4),(1,0))
+            reader,writer=await asyncio.open_connection(*address)
+            writer.write(struct.pack('!H',len(large))+large)
+            await writer.drain()
+            size=struct.unpack('!H',await asyncio.wait_for(reader.readexactly(2),2))[0]
+            self.assertEqual(await asyncio.wait_for(reader.readexactly(size),2),response(large))
+            self.assertEqual(queries,[packet,large,large])
+        finally:
+            if writer:
+                writer.close()
+                await writer.wait_closed()
+            client.close();udp.close();upstream.close()
+            tcp.close()
+            await tcp.wait_closed()
+            for task in list(protocol.tasks):task.cancel()
+            await asyncio.gather(*list(protocol.tasks),return_exceptions=True)
 
 
 class LimitTests(unittest.TestCase):
@@ -262,7 +339,7 @@ class PublicServiceIntegration(_service_support.ServiceIntegration):
         self.assertEqual(entries[0][1][1],'/psn/alice')
         self.assertEqual(self.request_as('bob','/psn/bob','MAP_REMOVE','public-gift')[0],200)
         from dns_probe import question
-        packet=struct.pack('!6H',72,256,1,0,0,0)+b'\x07example\x03org\0'+struct.pack('!HH',1,1)
+        packet=struct.pack('!6H',72,256,1,0,0,0)+b'\x07example\x03org\0'+struct.pack('!HH',255,1)
         with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sock:
             sock.bind(('127.0.0.2',0));sock.settimeout(2)
             sock.sendto(packet,('127.0.0.1',self.dns_port))

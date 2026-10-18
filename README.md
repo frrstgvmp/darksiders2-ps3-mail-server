@@ -15,7 +15,7 @@ saves or invoke trophy APIs. Trophy handling remains in the game.
 
 ## Connect
 
-1. Set primary PS3 DNS to **193.232.178.202**. Secondary DNS can be **1.1.1.1**; this combination has been reported working.
+1. Set primary PS3 DNS to **193.232.178.202**. The existing secondary DNS can remain; `1.1.1.1` has been reported working. For troubleshooting, use **193.232.178.202** for both entries.
 2. Keep the working gateway. Disable any unnecessary network proxy.
 3. Sign in to PSN and restart Darksiders II.
 4. Open the network inbox. Both participants must use this server.
@@ -24,11 +24,16 @@ No client executable replacement or console certificate installation is
 required for the reported OFW configuration. The current server address is
 operator-provided and may change. [Player guide](docs/PLAYER-GUIDE.md).
 
+The DNS service redirects only configured game hosts and forwards ordinary
+lookups for all other domains. A public secondary DNS does not provide the
+game redirects; if the console switches to it, the game may reach the original
+addresses. Router/VPN DNS interception can also override the console settings.
+
 ## Implementation
 
 | Component | Behavior |
 | --- | --- |
-| DNS | UDP/TCP; redirects configured THQ names and resolves permitted PSN domains |
+| DNS | UDP/TCP; redirects configured THQ names and forwards other ordinary DNS lookups |
 | HTTPS | Cloud API on port 8443; experimental certificate chain |
 | Authentication | PSN ticket signature, service, identity and lifetime verification |
 | Storage | SQLite; atomic batches and commit before successful response |
@@ -67,7 +72,7 @@ sudo apt-get install python3-cryptography
 python3 -m unittest discover -s tests -v
 ```
 
-33 automated tests passed for the release candidate. They cover ticket
+Automated tests cover ticket
 verification, permissions, quotas, Japanese mailbox operations, persistence,
 concurrency, DNS, routing and log redaction. Local TLS tests isolate API
 behavior and do not establish OFW compatibility.

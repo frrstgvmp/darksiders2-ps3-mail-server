@@ -4,7 +4,7 @@ This document describes the implemented subset, not a complete THQ Connect speci
 
 ## Routing and transport
 
-Exact configured THQ names receive the configured server IPv4 in DNS A replies. Public DNS forwards only IN A/AAAA requests within the game/PSN domain families listed in [PUBLIC-SERVER.md](PUBLIC-SERVER.md); other names/types return REFUSED. Both UDP and TCP are served with bounds/rate limits. Private mode also restricts source IPv4s. HTTPS peer/rate checks precede bounded worker TLS processing.
+Exact configured THQ names receive the configured server IPv4 in DNS A replies and an empty successful AAAA reply. Other ordinary IN-class record lookups are forwarded for all domains, including reverse DNS, TXT and SRV. Public mode refuses reserved/meta query types, ANY and zone transfers as listed in [PUBLIC-SERVER.md](PUBLIC-SERVER.md). Both UDP and TCP are served with bounds/rate limits. Private mode also restricts source IPv4s. HTTPS peer/rate checks precede bounded worker TLS processing.
 
 Observed Cloud hostname: `thqc-darksiders2-ps3-na.thqconnect.com:8443`. The examined European game and Japanese BLJS10199 also used this NA host. Other regions require a client trace; adding a DNS redirect alone does not add the hostname to the certificate. GDS uses `ds2.gds.thqconnect.com:443`; its protocol is outside the mailbox implementation.
 

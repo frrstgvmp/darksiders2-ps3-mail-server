@@ -43,6 +43,12 @@ These are code defaults, not a capacity guarantee. Quota failure rolls back the 
 
 ## DNS and operator checks
 
-Public DNS permits only IN A/AAAA within `playstation.net`, `playstation.com`, `ndmdhs.com`, `thqconnect.com`. Exact configured THQ hosts resolve to this server. Other permitted game/PSN queries are forwarded; arbitrary Internet names and ANY/TXT/etc. return REFUSED. It is unsuitable as a household general-purpose resolver.
+Public DNS forwards ordinary IN-class record lookups for all domains to the configured upstream. Exact configured THQ hosts receive this server's IPv4 for A and an empty successful AAAA response. Other names retain their upstream answers, including NXDOMAIN. This avoids rejecting console connectivity checks or regional PSN names outside a fixed domain allowlist. PTR queries used by tools such as Windows nslookup, TXT, SRV and other ordinary record types are forwarded too.
 
-Open UDP/TCP 53 and TCP 443/8443 for players. Optional UDP/TCP 1053 supports a routing workaround and is not entered in normal PS3 settings. Verify from a second network: game A redirect, PSN A forwarding, unrelated name/ANY refusal, anonymous health 200 and anonymous cloud 403. Use actual gameplay to check signed read/send, then recipient claim. The legacy health field `ofw_verified:false` is not a live gameplay test. Current player-confirmed OFW transfer/receipt and trophy evidence, with its scope and remaining checks, is recorded in [STATUS.md](STATUS.md).
+Public mode refuses non-IN classes and query types 0, OPT (41), TKEY (249), TSIG (250), IXFR (251), AXFR (252), MAILB (253), MAILA (254) and ANY (255). OPT records in a normal query's additional section are not the same as query type OPT. Rate, worker, TCP and UDP-size limits remain in place. This is a public forwarder; monitor its traffic as well as the mailbox service.
+
+Open UDP/TCP 53 and TCP 443/8443 for players. Optional UDP/TCP 1053 supports a routing workaround and is not entered in normal PS3 settings. Verify from a second network: game A redirect, PSN and unrelated-domain forwarding, reverse lookup forwarding, ANY/transfer refusal, anonymous health 200 and anonymous cloud 403. Compare UDP and TCP; a truncated UDP reply must be retrievable over TCP. The Windows commands are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+
+Players can change only their primary DNS when the console continues to use it. A public secondary DNS can remain configured, but it cannot supply the game redirects if selected. For a controlled check, set both entries to the server address and restart the game. Failure to reach this DNS through an ISP/router/VPN cannot be repaired by a server-side redirect rule.
+
+Use actual gameplay to check signed read/send, then recipient claim. The legacy health field `ofw_verified:false` is not a live gameplay test. Current player-confirmed OFW transfer/receipt and trophy evidence, with its scope and remaining checks, is recorded in [STATUS.md](STATUS.md).

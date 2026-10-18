@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Record PS3 DNS queries; forward packets unchanged to the normal resolver.
-
-This is a diagnostic collector, not a Darksiders server emulator.
-"""
+"""DNS forwarder with optional exact-host game redirects and bounded public access."""
 import argparse
 import asyncio
 import datetime
@@ -13,6 +10,11 @@ import struct
 from collections import Counter
 from pathlib import Path
 from access_control import AllowedPeers
+
+# These are reserved/meta operations rather than ordinary record lookups.
+# Public forwarding serves all Internet names; it does not offer transfers,
+# transaction authentication, or ANY/MAILA/MAILB queries.
+PUBLIC_BLOCKED_TYPES = frozenset((0, 41, 249, 250, 251, 252, 253, 254, 255))
 
 
 def question(packet):
@@ -116,8 +118,7 @@ class Probe:
         except (ValueError, UnicodeError):
             return error_response(packet, 1)
         if self.public_mode:
-            zones = ('playstation.net','playstation.com','ndmdhs.com','thqconnect.com')
-            if klass != 1 or kind not in (1,28) or not any(name == zone or name.endswith('.'+zone) for zone in zones):
+            if klass != 1 or kind in PUBLIC_BLOCKED_TYPES:
                 return error_response(packet,5)
         redirect_ip = getattr(self.args, "redirect_ip", None)
         redirect_hosts = getattr(self.args, "redirect_host", ())

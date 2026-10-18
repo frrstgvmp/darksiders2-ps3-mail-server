@@ -1,6 +1,6 @@
 # Verification status
 
-Updated: 2026-10-16. Scope: recorded OFW results and client protocol checks. [Editions](COMPATIBILITY.md).
+Updated: 2026-10-18. Scope: recorded OFW results and client protocol checks. [Editions](COMPATIBILITY.md).
 
 ## Recorded OFW result
 
@@ -32,7 +32,7 @@ sending/receipt and a fresh trophy result are still pending for BLUS30829.
 
 ## Implementation verification
 
-33 automated tests passed for the release candidate. Coverage includes signed
+36 automated tests passed on October 18. Coverage includes signed
 synthetic tickets, tampering, expiry, mailbox access, quotas, metadata,
 Japanese document isolation, transactions, restart persistence, DNS and logs.
 Automated clients use local certificates and synthetic signing keys; these
@@ -42,6 +42,23 @@ The experimental certificate chain used in the deployed configuration has
 PEM SHA-256 `7dc3793719fe783371f9cae5ae7e6ba39566c22cacb9109fc622599fa7a1e4d0`.
 Fresh generation changes keys and certificate fingerprints and requires a
 separate client check. The internal reason for client acceptance is unresolved.
+
+## DNS forwarding update — 2026-10-18
+
+Public DNS now forwards ordinary IN-class queries for all domain names,
+instead of rejecting names outside four fixed game/PSN domain families.
+Only configured game hosts receive local A/AAAA handling. Public rate limits,
+UDP truncation/TCP retry and refusal of ANY/transfer/meta queries remain.
+Tests cover unrelated names, reverse DNS, TXT/SRV forwarding, exact redirects,
+query restrictions and retrieval of a large answer over TCP after UDP truncation.
+After deployment, a second server confirmed the game redirect over UDP/TCP 53,
+ordinary A/TXT forwarding and ANY refusal. The mailbox health endpoint returned
+HTTP 200 on the deployed server.
+
+The change removes a server-side DNS restriction. It does not establish the
+cause of a particular player's PSN/Internet connection failure. Retesting by
+players who reported connection failures is pending. Public secondary DNS
+has been reported working, but cannot provide the game redirects if selected.
 
 ## Pending
 
