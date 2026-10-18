@@ -300,6 +300,32 @@ class PublicServiceIntegration(_service_support.ServiceIntegration):
         response=conn.getresponse();body=response.read();conn.close()
         return response.status,body
 
+    def test_public_news_feed_reload_and_errors_do_not_change_mail_authentication(self):
+        news_path='/thqconnect/news/getNews?version=1&platform=PS3_PSN&title=Darksiders2&language=Russian&limit=32'
+        def get_news():
+            context=ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname=False;context.verify_mode=ssl.CERT_NONE
+            connection=http.client.HTTPSConnection('127.0.0.1',self.https_port,timeout=3,context=context)
+            connection.request('GET',news_path)
+            response=connection.getresponse();result=(response.status,response.read());connection.close()
+            return result
+        self.assertEqual(get_news(),(200,b'[0,[]]\n'))
+        feed=self.root/'news.json'
+        feed.write_text(json.dumps({'items':[{'prefix':'Community','title':'News','body':'Test','datePosted':100}]}))
+        self.stop()
+        config=json.loads(self.config.read_text());config['news_file']=str(feed)
+        self.config.write_text(json.dumps(config));self.start()
+        status,body=get_news()
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body),[0,[['Community','News','Test',100]]])
+        self.assertEqual(self.request_as('alice','/psn/alice','MAP_GET',authenticated=False)[0],403)
+        feed.write_text('{broken')
+        self.stop();self.start()
+        self.assertEqual(get_news()[0],503)
+        self.assertEqual(self.request_as('alice','/psn/alice','MAP_GET')[0],200)
+        feed.write_text('{"items":[]}')
+        self.assertEqual(get_news(),(200,b'[0,[]]\n'))
+
     def test_japanese_mailbox_authenticated_delivery_and_claim(self):
         gift=base64.b64encode(b'BOD\xfd'+b'japanese-test-envelope'*3).decode()
         def call(name,profile,op,**kw):

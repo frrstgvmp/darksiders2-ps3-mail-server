@@ -12,7 +12,8 @@ import ssl
 
 BASE = Path(__file__).resolve().parents[1]
 FILES = ['ds2_server.py', 'cloud_api.py', 'dns_probe.py', 'lab_server.py', 'access_control.py',
-         'generate_server_certificates.py', 'backup_database.py', 'psn_auth.py', 'service_limits.py',
+         'generate_server_certificates.py', 'backup_database.py', 'psn_auth.py', 'service_limits.py', 'news_api.py',
+         'assets/news.example.json',
          'assets/thq-connect-root.pem', 'assets/psn-darksiders2-key.json',
          'deployment/install.sh', 'deployment/darksiders2-server.service',
          'deployment/darksiders2-backup.service', 'deployment/darksiders2-backup.timer']

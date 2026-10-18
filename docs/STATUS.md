@@ -1,6 +1,6 @@
 # Verification status
 
-Updated: 2026-10-18. Scope: recorded OFW results and client protocol checks. [Editions](COMPATIBILITY.md).
+Updated: 2026-10-19. Scope: recorded OFW results and client protocol checks. [Editions](COMPATIBILITY.md).
 
 ## Recorded OFW result
 
@@ -32,7 +32,7 @@ sending/receipt and a fresh trophy result are still pending for BLUS30829.
 
 ## Implementation verification
 
-36 automated tests passed on October 18. Coverage includes signed
+41 automated tests passed on October 19 (operator local date). Coverage includes signed
 synthetic tickets, tampering, expiry, mailbox access, quotas, metadata,
 Japanese document isolation, transactions, restart persistence, DNS and logs.
 Automated clients use local certificates and synthetic signing keys; these
@@ -67,7 +67,13 @@ has been reported working, but cannot provide the game redirects if selected.
 - Repeated delivery/claim/restart scenarios on OFW.
 - Fresh trophy capture correlating the game UI with the server request.
 - Independent clean deployment from the public release.
+- In-game display/layout/date verification for the new community news feed.
 
-GDS, THQ login/SSO and news are outside the implementation. The historical
+The news API now serves the original version-1 positional schema, with optional
+localized operator posts. Automated tests cover public reads, query/feed
+validation, runtime reload and continued mailbox authentication/availability
+when a feed is invalid. Actual in-game news rendering remains unverified.
+
+GDS and THQ login/SSO are outside the implementation. The historical
 `ofw_verified:false` field in health/export output is a fixed value, not an
 automatic console attestation. PSNProfiles approval has not been obtained.

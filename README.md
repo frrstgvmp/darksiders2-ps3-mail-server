@@ -39,8 +39,9 @@ addresses. Router/VPN DNS interception can also override the console settings.
 | Storage | SQLite; atomic batches and commit before successful response |
 | Gifts | Owner reads/deletes; another signed user may append a new entry |
 | Operations | GET, SET, REMOVE, MAP_GET, MAP_SET, MAP_REMOVE, SET_PERM |
+| News | Public read-only version-1 feed; configurable community posts and translations; in-game display check pending |
 
-GDS, THQ account login/SSO and news are not implemented. PSN friendship and
+GDS and THQ account login/SSO are not implemented. PSN friendship and
 full item semantics are not validated. Japanese `TomeGiftJP` is implemented
 as a separate mailbox; Japanese OFW and cross-region delivery are unverified.
 
@@ -60,6 +61,7 @@ private keys, player databases or game files.
 - [Installation](docs/INSTALL.md)
 - [Protocol](docs/PROTOCOL.md)
 - [Public access and limits](docs/PUBLIC-SERVER.md)
+- [Community news](docs/NEWS.md)
 - [Compatibility](docs/COMPATIBILITY.md)
 - [Verification status](docs/STATUS.md)
 - [Release procedure](docs/PUBLISHING.md)

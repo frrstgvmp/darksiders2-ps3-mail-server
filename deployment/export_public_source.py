@@ -16,12 +16,14 @@ FILES = (
     '.gitignore',
     'ds2_server.py',
     'cloud_api.py',
+    'news_api.py',
     'dns_probe.py',
     'lab_server.py',
     'access_control.py',
     'psn_auth.py',
     'service_limits.py',
     'assets/psn-darksiders2-key.json',
+    'assets/news.example.json',
     'generate_server_certificates.py',
     'backup_database.py',
     'vps_bridge.py',
@@ -48,7 +50,9 @@ FILES = (
     'docs/PLAYER-GUIDE.md',
     'docs/RELEASE-v0.4.6.md',
     'tests/test_public.py',
+    'tests/test_news.py',
     'docs/PUBLIC-SERVER.md',
+    'docs/NEWS.md',
 )
 
 

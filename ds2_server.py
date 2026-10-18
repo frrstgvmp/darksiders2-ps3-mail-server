@@ -2,6 +2,7 @@
 """Darksiders II DNS/HTTPS mail service with public or private access, configured by JSON."""
 import argparse
 import asyncio
+import hashlib
 import ipaddress
 import json
 import logging
@@ -14,12 +15,14 @@ import ssl
 import threading
 from collections import Counter
 from types import SimpleNamespace
+from urllib.parse import urlsplit
 
 from cloud_api import CloudStore
 from psn_auth import TicketVerifier
 from service_limits import RateLimit
+from news_api import NEWS_PATH, NewsFeed, NewsFeedError, NewsQueryError
 import dns_probe
-from lab_server import Collector, Handler, GAME_HOSTS, make_tls_context
+from lab_server import Collector, Handler, GAME_HOSTS, make_tls_context, redact_path
 
 
 class ServiceEvents:
@@ -46,7 +49,9 @@ class ServiceHandler(Handler):
     server_version = 'Darksiders2Mail/0.4'
 
     def do_GET(self):
-        if self.path == '/health':
+        if urlsplit(self.path).path == NEWS_PATH:
+            self.serve_news()
+        elif self.path == '/health':
             with sqlite3.connect(self.server.cloud_store.path) as connection:
                 connection.execute('SELECT 1').fetchone()
             response = b'{"ok":true,"service":"darksiders2-mail","ofw_verified":false}\n'
@@ -59,6 +64,31 @@ class ServiceHandler(Handler):
             self.wfile.write(response)
         else:
             self.collect()
+
+    def serve_news(self):
+        self.close_connection = True
+        self.server.events.write(event='http_request', client=self.client_address[0],
+            port=self.server.server_address[1], method='GET',
+            path=redact_path(self.path, private=True), bytes=0)
+        try:
+            response = self.server.news_feed.reply('GET', self.path)
+            status, content_type = 200, 'application/json; charset=utf-8'
+        except NewsQueryError:
+            response = b'Invalid news query.\n'
+            status, content_type = 400, 'text/plain; charset=utf-8'
+        except NewsFeedError:
+            response = b'News feed is temporarily unavailable.\n'
+            status, content_type = 503, 'text/plain; charset=utf-8'
+            self.server.events.write(event='news_feed_failed', error_type='NewsFeedError')
+        self.server.events.write(event='http_response', client=self.client_address[0],
+            port=self.server.server_address[1], status=status, bytes=len(response),
+            response_sha256=hashlib.sha256(response).hexdigest())
+        self.send_response(status)
+        self.send_header('Content-Type', content_type)
+        self.send_header('Content-Length', str(len(response)))
+        self.send_header('Connection', 'close')
+        self.end_headers()
+        self.wfile.write(response)
 
 
 def configuration(path, state_override=None):
@@ -111,6 +141,7 @@ def configuration(path, state_override=None):
                            gds_key=absolute(data['gds_key']) if data.get('gds_key') else None,
                            https_port=list(dict.fromkeys(ports)), database=state / 'cloud.sqlite3',
                            capture_dir=state / 'logs', capture_raw=bool(data.get('capture_raw', False)),
+                           news_file=absolute(data['news_file']) if data.get('news_file') is not None else None,
                            empty_inbox=False, state_dir=state, public_mode=public_mode,
                            psn_key=auth_key)
 
@@ -147,9 +178,11 @@ async def serve(args):
             gds_context.set_ciphers('AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:@SECLEVEL=0')
             gds_context.set_servername_callback(lambda sock, name, ctx: events.write(event='tls_sni', hostname=name))
         store = CloudStore(args.database)
+        news_feed = NewsFeed(args.news_file)
         for port in args.https_port:
             ctx = gds_context if port == 443 and gds_context else context
             listener = Collector(args, events, ctx, port, store, handler_cls=ServiceHandler)
+            listener.news_feed = news_feed
             listeners.append(listener)
         for listener in listeners:
             thread = threading.Thread(target=listener.serve_forever, daemon=True)
@@ -201,6 +234,7 @@ def main():
         if args.listen == args.upstream and args.upstream_port in args.dns_ports:
             raise ValueError('DNS upstream points back to the listener')
         if opts.check:
+            NewsFeed(args.news_file).entries('English')
             print('Configuration and TLS keys/chains loaded; no listeners started')
         else:
             asyncio.run(serve(args))

@@ -19,6 +19,7 @@
   "cloud_key": "pki/cloud.key",
   "gds_cert": null,
   "gds_key": null,
+  "news_file": "news.json",
   "state_dir": "/var/lib/darksiders2-server",
   "capture_raw": false,
   "public_mode": true,

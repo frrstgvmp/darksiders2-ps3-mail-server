@@ -4,6 +4,10 @@
 
 `public_mode:true` accepts all source IPv4 addresses without registration. Every cloud request must contain one valid, unexpired signed PSN ticket. `allowed_clients` is ignored for access in this mode; it may be retained for rollback. `capture_raw:true` is rejected. Use [config.public.example.json](../deployment/config.public.example.json), replace example addresses and provide local TLS material.
 
+The news GET endpoint and health check are public reads. News content comes
+only from an operator-owned local file; no news editing endpoint is exposed.
+Mailbox authentication is unchanged. See [NEWS.md](NEWS.md).
+
 Private mode (`public_mode:false`) requires a nonempty explicit IPv4 allowlist. `verify_psn_tickets:true` keeps the same authentication/permissions; false is a legacy local-research setting and must not be exposed publicly. The exporter supports `--public`, or repeated `--client` entries for private mode. The installed config is preserved during upgrades; review `config.json.new` rather than assuming an upgrade switched modes.
 
 ## Identity and public-key provenance

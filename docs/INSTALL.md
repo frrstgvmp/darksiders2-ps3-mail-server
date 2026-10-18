@@ -54,11 +54,14 @@ modify firewall policy. Check port conflicts with `ss -lntup`.
 Restricted mode requires `allowed_clients`; retain `verify_psn_tickets:true`.
 Use `capture_raw:false`. Public mode rejects raw capture.
 Certificate paths are relative to the config file. GDS API is unsupported.
+Optional `news_file` selects an operator-owned JSON announcement file; see
+[community news](NEWS.md). Without it, the news API returns an empty feed.
 
 | Path | Contents |
 | --- | --- |
 | `/opt/darksiders2-server` | Code and public verification material |
 | `/etc/darksiders2-server/config.json` | Runtime configuration |
+| `/etc/darksiders2-server/news.json` | Operator-authored community announcements |
 | `/etc/darksiders2-server/pki` | TLS chain and private key |
 | `/var/lib/darksiders2-server/cloud.sqlite3` | Mail and account/profile associations |
 | `/var/lib/darksiders2-server/logs` | Rotating metadata logs |
@@ -90,8 +93,9 @@ No game executable replacement or console CA installation is part of setup.
 | HTTP 403 | Ticket format/signature, expiry, service, PSN session and server clock |
 | HTTP 503 | Unsupported operation/document, denied access, quota or malformed batch |
 
-Do not disable public authentication for diagnostics. GDS, news and THQ/SSO
-errors are separate from mailbox API errors.
+Do not disable public authentication for diagnostics. GDS and THQ/SSO
+errors are separate from mailbox API errors. News feed/configuration errors
+are documented in [NEWS.md](NEWS.md).
 
 For an existing PC VPN gateway, `vps_bridge.py` can relay TLS unchanged.
 `configure_vps_direct.py --mode plan` describes a narrow route for the existing

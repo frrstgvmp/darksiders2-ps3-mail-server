@@ -43,7 +43,13 @@ Outer array: `[resultCode, documents]`. Each document: `[status, documentJsonStr
 
 A gift request has `ops=MAP_SET`, `docKeys=TomeGift` (or `TomeGiftJP` for the observed Japanese client), the recipient in `profileNames`, an opaque gift identifier in `keys` and the game's base64-like payload in `values`. The payload is saved unchanged. An HTTP 200 is sent only after commit. Storage and protocol checks are covered by automated tests. OFW results are recorded in [STATUS.md](STATUS.md).
 
-Authenticated unsupported/denied requests receive HTTP 503 from the collector; invalid/missing tickets receive403. Authentication runs before mailbox operations. This includes login/platformLogin, login/ssoStatus, news/getNews, GDS and unrecognized cloud operations. A 503 does not automatically mean TLS failed: TLS and application errors must be distinguished in traces.
+Authenticated unsupported/denied requests receive HTTP 503 from the collector; invalid/missing tickets receive403. Authentication runs before mailbox operations. This includes login/platformLogin, login/ssoStatus, GDS and unrecognized cloud operations. A 503 does not automatically mean TLS failed: TLS and application errors must be distinguished in traces.
+
+`GET /thqconnect/news/getNews` is a separate public read-only route. Its version-1
+response is `[0, [[prefix, title, body, datePosted], ...]]`. It loads configured
+operator posts and does not access mail or authenticate a player. Query errors
+return 400; an invalid configured feed returns 503. See [NEWS.md](NEWS.md) for
+configuration, validation and the pending in-game rendering check.
 
 ## Database
 
