@@ -60,6 +60,14 @@ cause of a particular player's PSN/Internet connection failure. Retesting by
 players who reported connection failures is pending. Public secondary DNS
 has been reported working, but cannot provide the game redirects if selected.
 
+## News ticker verification — 2026-10-19
+
+A player screenshot shows `Community` and `Mail server news test` in the bottom
+news ticker of the main menu. The player reported using OFW; exact firmware,
+game update and disc code were not recorded for this check. The corresponding
+English news request returned HTTP 200 at 21:59:39 UTC on October 18.
+This confirms prefix and title display, not every field or edition.
+
 ## Pending
 
 - Exact OFW and game update numbers for the recorded result.
@@ -67,12 +75,13 @@ has been reported working, but cannot provide the game redirects if selected.
 - Repeated delivery/claim/restart scenarios on OFW.
 - Fresh trophy capture correlating the game UI with the server request.
 - Independent clean deployment from the public release.
-- In-game display/layout/date verification for the new community news feed.
+- News body/date display, Cyrillic rendering and multiple-post rotation.
 
 The news API now serves the original version-1 positional schema, with optional
 localized operator posts. Automated tests cover public reads, query/feed
 validation, runtime reload and continued mailbox authentication/availability
-when a feed is invalid. Actual in-game news rendering remains unverified.
+when a feed is invalid. Main-menu prefix and title display are confirmed by
+the screenshot described above.
 
 GDS and THQ login/SSO are outside the implementation. The historical
 `ofw_verified:false` field in health/export output is a fixed value, not an

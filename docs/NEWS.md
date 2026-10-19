@@ -74,9 +74,15 @@ Reader references in the examined original client: result `0x67dd8c`, entry
 
 ## In-game verification
 
-The client contains a news cache and a `News_getNews` script binding. Serving
-the endpoint alone does not establish which screen displays the text. Rendering,
-layout, date display and behavior across game editions still need an actual
-console check. Restart the game for a controlled first check because cached
-results may delay a fresh request. Record the news request time and the text
-visible in the game. HTTP 200 proves an API response, not successful rendering.
+On October 19, 2026 (operator local date), a player screenshot confirmed the
+announcement in the bottom news ticker of the main menu: the red prefix
+`Community` and the title `Mail server news test` were visible. The player
+reported using OFW. The exact firmware, game update and disc code were not
+recorded for this news check.
+
+The screenshot confirms prefix and title display. Body text, date display,
+Cyrillic rendering, multiple-post rotation and behavior across game editions
+remain unverified. The client contains a news cache and a `News_getNews` script
+binding. Restart the game for a controlled first check because cached results
+may delay a fresh request. Record both the request time and visible text;
+HTTP 200 alone does not prove successful rendering.

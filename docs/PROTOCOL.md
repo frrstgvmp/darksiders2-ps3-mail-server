@@ -49,7 +49,7 @@ Authenticated unsupported/denied requests receive HTTP 503 from the collector; i
 response is `[0, [[prefix, title, body, datePosted], ...]]`. It loads configured
 operator posts and does not access mail or authenticate a player. Query errors
 return 400; an invalid configured feed returns 503. See [NEWS.md](NEWS.md) for
-configuration, validation and the pending in-game rendering check.
+configuration, validation and the recorded main-menu ticker display.
 
 ## Database
 
