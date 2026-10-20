@@ -1,89 +1,104 @@
-# Mailbox protocol and implementation
+# Protocol
 
-This document describes the implemented subset, not a complete THQ Connect specification. Examples use dummy profile names and omit authentication tickets.
+Implemented THQ Connect subset for Darksiders II PS3.
 
-## Routing and transport
+## Transport
 
-Exact configured THQ names receive the configured server IPv4 in DNS A replies and an empty successful AAAA reply. Other ordinary IN-class record lookups are forwarded for all domains, including reverse DNS, TXT and SRV. Public mode refuses reserved/meta query types, ANY and zone transfers as listed in [PUBLIC-SERVER.md](PUBLIC-SERVER.md). Both UDP and TCP are served with bounds/rate limits. Private mode also restricts source IPv4s. HTTPS peer/rate checks precede bounded worker TLS processing.
+- Cloud: `thqc-darksiders2-ps3-na.thqconnect.com:8443`.
+- GDS: `ds2.gds.thqconnect.com:443`; application API unsupported.
+- Mail: `GET` or form-encoded `POST /thqconnect/cloud/execute`.
+- Required values: `version=1`, `platform=PS3_PSN`, `title=Darksiders2`.
+- Query and POST fields are combined; duplicate required parameters are rejected.
 
-Observed Cloud hostname: `thqc-darksiders2-ps3-na.thqconnect.com:8443`. The examined European game and Japanese BLJS10199 also used this NA host. Other regions require a client trace; adding a DNS redirect alone does not add the hostname to the certificate. GDS uses `ds2.gds.thqconnect.com:443`; its protocol is outside the mailbox implementation.
+The experimental TLS chain uses intermediate signature OID
+`1.3.6.1.4.1.55555.123`. It is not publicly trusted; client acceptance is not
+established for every firmware or newly generated chain. DNS redirection does
+not remove hostname or certificate requirements.
 
-`GET` and form-encoded `POST` are supported at `/thqconnect/cloud/execute`. Required parameters are `version=1`, `platform=PS3_PSN`, `title=Darksiders2`. Public mode requires exactly one base64 `auth` ticket, verifies its signature against the pinned public PSN key, and checks identity, game service and expiry. Private mode may enable the same checks with `verify_psn_tickets:true`. Authentication failure returns403; health is anonymous. POST fields and query fields are combined; duplicate required parameters are rejected. The collector accepts Content-Length bodies up to 64 KiB in public mode (512 KiB in private research mode), not chunked encoding.
+## Authentication
 
-## Operations and batches
+Cloud requests require one base64 PSN ticket in `auth` when verification is
+enabled. Public mode always enables verification. Health and news are public reads.
 
-`profileNames`, `ops`, `docKeys`, `keys`, and `values` are aligned comma-separated vectors. Empty positions must be preserved. A batch contains 1–64 operations. Optional `policy`, `worldPerms`, `friendPerms` may be scalar or aligned vectors. This limited representation does not escape commas inside individual batch values.
+The verifier checks the ECDSA signature, signed account/profile, game service,
+issue time and expiry. Protocol algorithms: secp192r1 and SHA-1.
+Supported signer: `4ca0c71d`. Service: `UP1005-BLUS30829_00`.
+The bundled key is public verification material, not a private signing key.
+Service IDs do not identify the disc region. Key rotation or another service
+requires an explicit verification-key configuration.
 
-Profiles are `/psn/` followed by 1–32 ASCII letters, digits, underscores or hyphens and are stored lowercase. Supported documents are `TomeGift`, `TomeGiftJP` (Japanese BLJS10199 mailbox), and `GameToWeb`. The two gift documents are separate namespaces with identical authorization, envelope checks, retry rules and quotas. Gifts are not automatically copied or forwarded between them; cross-region delivery is not established.
+Invalid authentication returns HTTP 403. Authenticated unsupported or denied
+operations, invalid batches and quota failures return HTTP 503. HTTP 200 is
+sent after database commit. GDS and THQ login/SSO remain unsupported.
 
-| Operation | Implemented behavior |
-|---|---|
-| `GET` | Return full document map and metadata |
-| `SET` with empty value | Initialize/update metadata, preserve queued entries |
-| `SET` with JSON object value | Replace map; string values; authenticated gift-document replacement denied |
-| `REMOVE` | Remove whole document |
-| `MAP_GET` | Return full map as SDK entry array with per-key sender/date; keyed reads not implemented |
-| `MAP_SET` | Store opaque value under nonempty key; authenticated gifts append with envelope/quota checks |
-| `MAP_REMOVE` | Remove key, idempotent when missing |
-| `SET_PERM` | Update stored policy metadata |
+## Mail operations
 
-GET/SET, MAP_GET/MAP_SET and MAP_REMOVE requests were observed. The client downloads gift blobs into local storage and automatically removes the corresponding cloud keys; this precedes inventory acceptance. A MAP_REMOVE alone does not prove the player took the item. REMOVE and SET_PERM are supported server operations, not claimed as observed game flows. Friendship/world permission bits are accepted but not enforced against PSN. In authenticated mode `modified_by` records the signed sender; legacy unauthenticated research mode records the target profile.
+`profileNames`, `ops`, `docKeys`, `keys` and `values` are aligned comma-separated
+vectors. Preserve empty positions; commas inside values are not escaped.
+A batch contains 1–64 operations. `policy`, `worldPerms` and `friendPerms` may
+be scalar or aligned vectors.
 
-The server validates the entire batch before changing the database. It executes changes under SQLite `BEGIN IMMEDIATE` and commits before responding. Later execution failures roll back earlier changes. Empty reads return an empty map. Gift values are stored unchanged. Authenticated mode checks bounded base64/BOD envelopes, not complete item semantics; it does not synthesize contents. Full-document removal is restricted to the signed owner; nonempty `SET` replacement of either gift document is denied in authenticated mode. Empty initialization preserves entries. A sender may append a new gift to another profile but cannot read/delete its gifts. Existing gift keys accept only identical retries. Cross-profile responses return just the sent entry, not the recipient map. Account/profile associations prevent ownership takeover. Bounded quotas apply and roll back the whole batch on failure; see [PUBLIC-SERVER.md](PUBLIC-SERVER.md).
+Profiles are `/psn/` followed by 1–32 ASCII letters, digits, underscores or
+hyphens, normalized to lowercase. Documents: `TomeGift`, `TomeGiftJP` and
+`GameToWeb`. Japanese and international gift documents are separate.
 
-## Version 1 response
+| Operation | Behavior |
+| --- | --- |
+| `GET` | Return document map and metadata |
+| `SET` with empty value | Initialize metadata; preserve queued gifts |
+| `SET` with JSON object | Replace map; denied for authenticated gift documents |
+| `REMOVE` | Remove own document |
+| `MAP_GET` | Return all entries with sender/time metadata |
+| `MAP_SET` | Store a value; cross-profile gifts are append-only |
+| `MAP_REMOVE` | Remove own key; missing keys succeed |
+| `SET_PERM` | Store policy metadata |
 
-The response is positional JSON, with the document itself encoded as a JSON string:
+The signed account is bound to its profile on first use. Owners may read and
+remove their gifts. Other accounts may append new gifts but cannot read or
+delete recipient mail. Identical retries succeed; conflicting gift keys fail.
+Cross-profile responses contain only the sent entry. Friendship and permission
+bits are not checked against PSN. Online ID changes require operator handling.
+
+Gift payloads remain unchanged. Validation checks bounded base64/BOD envelopes,
+not full equipment semantics. The server does not generate items or invoke trophy
+APIs. The client downloads gifts to local storage and removes their cloud keys
+before inventory claim; cloud removal alone does not establish item receipt.
+
+## Response format
+
+Version 1 uses positional JSON. Empty document:
 
 ```json
 [0, [[0, "{}", 0, 0, ""]]]
 ```
 
-Outer array: `[resultCode, documents]`. Each document: `[status, documentJsonString, policyBits, lastModifiedSeconds, lastModifiedProfileName]`. The empty inbox response above is 22 bytes including its newline and was accepted in game. GET returns the stored compact map; a nonempty MAP_GET returns a serialized SDK entry array and outer document metadata. Cross-profile gift append returns only the sent entry and sender-operation metadata. Timestamps use Unix seconds; the original reader is signed 32-bit.
-
-A gift request has `ops=MAP_SET`, `docKeys=TomeGift` (or `TomeGiftJP` for the observed Japanese client), the recipient in `profileNames`, an opaque gift identifier in `keys` and the game's base64-like payload in `values`. The payload is saved unchanged. An HTTP 200 is sent only after commit. Storage and protocol checks are covered by automated tests. OFW results are recorded in [STATUS.md](STATUS.md).
-
-Authenticated unsupported/denied requests receive HTTP 503 from the collector; invalid/missing tickets receive403. Authentication runs before mailbox operations. This includes login/platformLogin, login/ssoStatus, GDS and unrecognized cloud operations. A 503 does not automatically mean TLS failed: TLS and application errors must be distinguished in traces.
-
-`GET /thqconnect/news/getNews` is a separate public read-only route. Its version-1
-response is `[0, [[prefix, title, body, datePosted], ...]]`. It loads configured
-operator posts and does not access mail or authenticate a player. Query errors
-return 400; an invalid configured feed returns 503. See [NEWS.md](NEWS.md) for
-configuration, validation and the recorded main-menu ticker display.
-
-## Database
-
-SQLite table `documents`:
-
-```sql
-CREATE TABLE documents (
-  profile TEXT NOT NULL,
-  name TEXT NOT NULL,
-  data TEXT NOT NULL,
-  policy INTEGER NOT NULL,
-  modified INTEGER NOT NULL,
-  modified_by TEXT NOT NULL,
-  PRIMARY KEY (profile, name)
-);
-```
-
-`documents.data` remains compact JSON mapping keys to unchanged opaque strings. MAP_GET serializes nonempty maps for the original version-1 SDK as follows (this array is placed inside the outer document JSON string):
+Outer fields: `[resultCode, documents]`. Document fields:
+`[status, documentJsonString, policyBits, modifiedSeconds, modifiedBy]`.
+A nonempty `MAP_GET` encodes this array inside `documentJsonString`:
 
 ```json
-[["gift-id", ["opaque-base64", "/psn/sender", 1700000000]]]
+[["gift-id", ["opaque-base64", "/psn/sender", 0]]]
 ```
 
-Each entry is `[key, data]`; data is `[value, lastModifiedName, lastModifiedDate]`. Version 1 reads positions, so labelled objects cannot substitute for these arrays. An empty map retains the already-tested `"{}"` representation. A letter without Gift/Items has no attachment to claim.
+An entry is `[key, [value, sender, modifiedSeconds]]`. Timestamps use Unix
+seconds. The original reader uses positional arrays and signed 32-bit time.
 
-Per-key metadata is stored separately in `map_metadata(profile,name,key,modified,modified_by)` with a composite primary key. Legacy entries inherit the original document metadata on first access, before any initialization changes it. New writes record their signed sender/date. Identical gift retries and empty initialization preserve per-key metadata; removal deletes corresponding metadata transactionally. The service opens a connection per batch and serializes local operations. Transactions also prevent lost writes between independent store instances. The backup tool uses SQLite's backup API rather than copying a live file.
+## News
 
-Authenticated mode adds:
+`GET /thqconnect/news/getNews` requires the same version/platform/title values.
+Optional `limit` is 0–32, default 32; `language` defaults to English.
 
-```sql
-CREATE TABLE profile_owners (
-  profile TEXT PRIMARY KEY,
-  account_id TEXT NOT NULL
-);
+```json
+[0, [["COMMUNITY SERVER", "Announcement text", "Full body", 0]]]
 ```
 
-The owner is inserted transactionally on first authenticated use. Another account claiming an already-bound profile is rejected. PSN Online ID changes/deletion requests currently require an operator procedure; there is no migration web endpoint. Existing private research documents remain stored, while subsequent signed operations use the access policy above.
+Entry fields: `[prefix, title, body, datePosted]`. Invalid query: HTTP 400;
+invalid configured feed: HTTP 503. [Configuration](CONFIGURATION.md#news).
+
+## Storage
+
+SQLite tables: `documents`, `map_metadata` and `profile_owners`.
+Batches are validated before mutation, executed under `BEGIN IMMEDIATE` and
+committed atomically. Failures roll back the batch. Per-key sender/time metadata
+survives identical retries and document initialization. Backups use SQLite's
+backup API rather than copying a live database file.

@@ -1,15 +1,14 @@
 {
   "items": [
     {
-      "prefix": "Community",
-      "title": "Mail server news test",
-      "body": "This is a test announcement from the community server. Network mail and gifts are available.",
-      "datePosted": 1792357200,
+      "prefix": "COMMUNITY SERVER",
+      "title": "Network mail and gifts are available.",
+      "body": "Network mail and gifts are available.",
+      "datePosted": 0,
       "translations": {
         "Russian": {
-          "prefix": "Сообщество",
-          "title": "Тест новостей почтового сервера",
-          "body": "Это тестовая новость сервера сообщества. Сетевая почта и пересылка подарков доступны."
+          "title": "Сетевая почта и подарки доступны.",
+          "body": "Сетевая почта и подарки доступны."
         }
       }
     }

@@ -1,84 +1,62 @@
 # Darksiders II PS3 Mail Server
 
-Self-hosted THQ Connect mailbox service for Darksiders II on PS3 OFW.
-DNS redirection, signed PSN ticket verification and persistent gift storage.
-
-## Status
-
-OFW/BLES01597: mailbox access, gift sending, receipt into inventory and
-Pay It Forward were reported by a player on October 14–15, 2026. The exact
-firmware number and game update were not recorded. Other editions require
-separate OFW verification. [Compatibility](docs/COMPATIBILITY.md).
-
-The service stores game-generated gift payloads unchanged. It does not edit
-saves or invoke trophy APIs. Trophy handling remains in the game.
+THQ Connect replacement for the Darksiders II network inbox on PS3.
+Supports gift delivery, community news and the original Pay It Forward flow.
 
 ## Connect
 
-1. Set primary PS3 DNS to **193.232.178.202**. The existing secondary DNS can remain; `1.1.1.1` has been reported working. For troubleshooting, use **193.232.178.202** for both entries.
-2. Keep the working gateway. Disable any unnecessary network proxy.
-3. Sign in to PSN and restart Darksiders II.
-4. Open the network inbox. Both participants must use this server.
+1. Set the PS3 primary DNS to **193.232.178.202**.
+2. The secondary DNS can remain `1.1.1.1`. If connection fails, use **193.232.178.202** for both entries.
+3. Sign in to PSN, restart the game and open the network inbox in the Tome.
 
-No client executable replacement or console certificate installation is
-required for the reported OFW configuration. The current server address is
-operator-provided and may change. [Player guide](docs/PLAYER-GUIDE.md).
+Both players must use the same server. No game patch or console certificate
+installation is required for the supported OFW configuration.
 
-The DNS service redirects only configured game hosts and forwards ordinary
-lookups for all other domains. A public secondary DNS does not provide the
-game redirects; if the console switches to it, the game may reach the original
-addresses. Router/VPN DNS interception can also override the console settings.
+A public secondary DNS does not provide the game redirects. Router or VPN
+DNS interception can override the console settings. Keep the gateway that
+already provides a working PSN connection.
 
-## Implementation
+## Gifts
 
-| Component | Behavior |
+Choose a recipient, select an item and use **Add item to gift** before sending.
+Message text is optional. Open received mail and use **Take All** to claim its
+attachments. Save the game before exiting; downloaded letters are stored locally.
+
+The server preserves item data. Trophies and inventory changes are handled
+by the game.
+
+## Compatibility
+
+| Edition | Status |
 | --- | --- |
-| DNS | UDP/TCP; redirects configured THQ names and forwards other ordinary DNS lookups |
-| HTTPS | Cloud API on port 8443; experimental certificate chain |
-| Authentication | PSN ticket signature, service, identity and lifetime verification |
-| Storage | SQLite; atomic batches and commit before successful response |
-| Gifts | Owner reads/deletes; another signed user may append a new entry |
-| Operations | GET, SET, REMOVE, MAP_GET, MAP_SET, MAP_REMOVE, SET_PERM |
-| News | Public read-only version-1 feed; configurable community posts and translations; main-menu prefix/title display confirmed in a player screenshot |
+| Europe — BLES01597 | OFW inbox, item transfer and Pay It Forward supported |
+| USA — BLUS30829 | Connection and inbox checked; stock OFW verification pending |
+| Japan — BLJS10199 | Separate mailbox implemented; OFW verification pending |
 
-GDS and THQ account login/SSO are not implemented. PSN friendship and
-full item semantics are not validated. Japanese `TomeGiftJP` is implemented
-as a separate mailbox; Japanese OFW and cross-region delivery are unverified.
+Other firmware and game-update combinations require verification.
+Japanese and international mailboxes are separate; cross-region delivery is unverified.
 
-## Deploy
+## Hosting
 
-Debian 13, Python 3.10+, systemd, public IPv4 and `python3-cryptography`.
-Open UDP/TCP 53 and TCP 443/8443. Follow [installation](docs/INSTALL.md).
+Requirements: Debian 13, Python 3.10+, `python3-cryptography`, systemd and a
+public IPv4 address. Open UDP/TCP **53** and TCP **443/8443**.
 
-The deployment uses an experimental chain with an unknown intermediate
-signature algorithm. It is not publicly trusted. A newly generated chain
-requires an OFW client check; acceptance on every firmware is not established.
-The release contains a public root certificate and generator, not operational
-private keys, player databases or game files.
+Follow [Installation](docs/INSTALL.md) to generate TLS material and install the
+service. DNS, HTTPS and SQLite storage run in one process.
+
+The TLS chain is experimental and is not publicly trusted. A newly generated
+chain requires a console compatibility check. Preserve working keys across
+updates; operational private keys are not distributed.
 
 ## Documentation
 
-- [Installation](docs/INSTALL.md)
-- [Protocol](docs/PROTOCOL.md)
-- [Public access and limits](docs/PUBLIC-SERVER.md)
-- [Community news](docs/NEWS.md)
-- [Compatibility](docs/COMPATIBILITY.md)
-- [Verification status](docs/STATUS.md)
-- [Release procedure](docs/PUBLISHING.md)
-- [Third-party notices](NOTICE)
+- [Installation, updates and troubleshooting](docs/INSTALL.md)
+- [Configuration and news](docs/CONFIGURATION.md)
+- [Protocol and authentication](docs/PROTOCOL.md)
 
-## Validation
+GDS and THQ account login/SSO are not implemented. PSN friendship and complete
+item semantics are not validated.
 
-```bash
-sudo apt-get install python3-cryptography
-python3 -m unittest discover -s tests -v
-```
-
-Automated tests cover ticket
-verification, permissions, quotas, Japanese mailbox operations, persistence,
-concurrency, DNS, routing and log redaction. Local TLS tests isolate API
-behavior and do not establish OFW compatibility.
-
-Original project code and documentation: MIT. Third-party public certificate
-and key provenance: [NOTICE](NOTICE). Independent project; no affiliation with
-Sony or THQ Nordic. No PSNProfiles approval has been obtained.
+MIT license. Third-party material: [NOTICE](NOTICE).
+Independent project, not affiliated with Sony or THQ Nordic.
+Not approved by PSNProfiles.com.
