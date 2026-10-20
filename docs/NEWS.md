@@ -39,6 +39,15 @@ override prefix, title or body independently. Items are sorted newest first.
 Use plain text for announcements. These are community posts, not restored
 historical THQ news.
 
+The observed main-menu ticker displays `prefix` as the red label and `title`
+as the scrolling message. Put the announcement message in `title` if it should
+appear there; a message stored only in `body` is not visible in that ticker.
+For example, use `prefix: "COMMUNITY SERVER"` and put the announcement in
+`title`, with translated `title` values for localized messages. The `body`
+field is still part of the protocol, but no separate body view has been
+confirmed. An empty prefix removes the label; it does not promote `body` to
+the visible message. Colors are controlled by the game's UI.
+
 Limits: 32 posts, 128 KiB JSON file; UTF-8 byte limits of 64 for prefix, 256 for
 title and 4096 for body. NUL/control characters are refused, with newline/tab
 allowed in body. `datePosted` is a nonnegative Unix-seconds timestamp bounded
