@@ -1,7 +1,7 @@
 # Darksiders II PS3 Mail Server
 
-THQ Connect replacement for the Darksiders II network inbox on PS3.
-Supports gift delivery, community news and the original Pay It Forward flow.
+THQ Connect replacement for Darksiders II on PS3.
+Restores online mail, gift delivery and community news.
 
 ## Connect
 
@@ -21,6 +21,9 @@ already provides a working PSN connection.
 Choose a recipient, select an item and use **Add item to gift** before sending.
 Message text is optional. Open received mail and use **Take All** to claim its
 attachments. Save the game before exiting; downloaded letters are stored locally.
+
+A successful gift send unlocks **Pay It Forward** and displays the standard
+PS3 trophy notification.
 
 The server preserves item data. Trophies and inventory changes are handled
 by the game.
