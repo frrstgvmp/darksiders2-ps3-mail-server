@@ -32,11 +32,10 @@ by the game.
 
 | Edition | Status |
 | --- | --- |
-| Europe — BLES01597 | OFW inbox, item transfer and Pay It Forward supported |
-| USA — BLUS30829 | Connection and inbox checked; stock OFW verification pending |
-| Japan — BLJS10199 | Separate mailbox implemented; OFW verification pending |
+| Europe — BLES01597 | Verified on OFW: inbox, gift transfer and Pay It Forward |
+| USA — BLUS30829 | Verified on OFW: inbox, gift transfer and Pay It Forward |
+| Japan — BLJS10199 | Verified on OFW: inbox, gift transfer and Pay It Forward |
 
-Other firmware and game-update combinations require verification.
 Japanese and international mailboxes are separate; cross-region delivery is unverified.
 
 ## Hosting
