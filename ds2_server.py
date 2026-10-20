@@ -22,7 +22,7 @@ from psn_auth import TicketVerifier
 from service_limits import RateLimit
 from news_api import NEWS_PATH, NewsFeed, NewsFeedError, NewsQueryError
 import dns_probe
-from lab_server import Collector, Handler, GAME_HOSTS, make_tls_context, redact_path
+from http_server import HTTPServer, RequestHandler, GAME_HOSTS, make_tls_context, redact_path
 
 
 class ServiceEvents:
@@ -45,7 +45,7 @@ class ServiceEvents:
         self.handler.close()
 
 
-class ServiceHandler(Handler):
+class ServiceHandler(RequestHandler):
     server_version = 'Darksiders2Mail/0.4'
 
     def do_GET(self):
@@ -181,7 +181,7 @@ async def serve(args):
         news_feed = NewsFeed(args.news_file)
         for port in args.https_port:
             ctx = gds_context if port == 443 and gds_context else context
-            listener = Collector(args, events, ctx, port, store, handler_cls=ServiceHandler)
+            listener = HTTPServer(args, events, ctx, port, store, handler_cls=ServiceHandler)
             listener.news_feed = news_feed
             listeners.append(listener)
         for listener in listeners:
