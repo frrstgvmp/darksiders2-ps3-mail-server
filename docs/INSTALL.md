@@ -20,7 +20,8 @@ Replace `203.0.113.10` with the server's public IPv4. Setup loads the bundled
 image, or builds from source if no suitable bundled image is available. It
 creates `.env`, initializes persistent files and starts the server and daily
 backup worker. Docker must be accessible to the current user; run the entire
-setup as root if needed. Containers run with a nonzero UID.
+setup as root if needed. Containers run with a nonzero UID. Setup waits for a healthy server before
+reporting success.
 
 The generated TLS chain is experimental. Verify it with an original console
 client before advertising a new server. Existing keys are preserved on repeat

@@ -43,6 +43,6 @@ if ! docker image inspect "$image" >/dev/null 2>&1; then
     fi
 fi
 docker compose run --rm --no-deps init
-docker compose up -d server backup
+docker compose up -d --wait --wait-timeout 90 server backup
 printf '\nServer started. Set PS3 DNS to %s.\n' "$public_ip"
 printf '%s\n' 'Status: docker compose ps' 'Logs: docker compose logs -f server'
