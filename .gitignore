@@ -13,3 +13,7 @@ dist/
 *.pcapng
 config.json
 pki/
+.env
+config/
+data/
+image-*.tar.gz

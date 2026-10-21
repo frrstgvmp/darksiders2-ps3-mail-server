@@ -46,7 +46,7 @@ class ServiceEvents:
 
 
 class ServiceHandler(RequestHandler):
-    server_version = 'Darksiders2Mail/0.4'
+    server_version = 'Darksiders2Mail/0.5.0'
 
     def do_GET(self):
         if urlsplit(self.path).path == NEWS_PATH:

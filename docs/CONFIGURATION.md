@@ -1,5 +1,12 @@
 # Configuration
 
+Docker uses `.env` for host networking/UID settings and `config/config.json`
+for the service. `setup.sh` initializes defaults once and preserves existing
+files. `BIND_IP` must belong to the Docker host; use a local interface address
+for provider NAT. `PUBLIC_IP` must match `public_ip` in the service config.
+Container `listen` is `0.0.0.0`, `state_dir` is `/data`, and TLS/news paths are
+relative to `/config`. DNS and HTTPS port publishing is defined in `compose.yaml`.
+
 Examples: [public](../deployment/config.public.example.json) and
 [restricted](../deployment/config.example.json).
 Paths are resolved relative to the configuration file unless absolute.

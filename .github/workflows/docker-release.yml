@@ -1,0 +1,63 @@
+name: Docker release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Validate release metadata
+        run: |
+          sh -n setup.sh
+          sh -n deployment/install.sh
+          if [ "$GITHUB_REF_TYPE" = tag ]; then test "$GITHUB_REF_NAME" = "v$(cat VERSION)"; fi
+      - name: Build image
+        run: docker build --tag "darksiders2-ps3-mail-server:$(cat VERSION)" .
+      - name: Check end-user deployment
+        run: python3 .github/scripts/check_container.py
+      - name: Assemble Docker bundle
+        run: |
+          version=$(cat VERSION)
+          name="darksiders2-ps3-mail-server-$version-docker-amd64"
+          mkdir -p "stage/$name" artifacts
+          git archive HEAD | tar -x -C "stage/$name"
+          rm -rf "stage/$name/.github"
+          docker save "darksiders2-ps3-mail-server:$version" | gzip > "stage/$name/image-amd64.tar.gz"
+          tar -czf "artifacts/$name.tar.gz" -C stage "$name"
+          cd artifacts
+          sha256sum "$name.tar.gz" > SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: docker-release
+          path: artifacts/
+          compression-level: 0
+          retention-days: 7
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: docker-release
+          path: artifacts
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" artifacts/* \
+            --verify-tag --title "$GITHUB_REF_NAME — Docker Compose" \
+            --notes-file .github/RELEASE.md --latest

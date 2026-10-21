@@ -131,7 +131,7 @@ class HTTPServer(http.server.ThreadingHTTPServer):
 
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
-    server_version = "Darksiders2Mail/0.4"
+    server_version = "Darksiders2Mail/0.5.0"
 
     def log_message(self, *_):
         pass

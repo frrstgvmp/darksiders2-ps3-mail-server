@@ -1,0 +1,57 @@
+name: darksiders2
+
+x-common: &common
+  image: darksiders2-ps3-mail-server:0.5.0
+  build: .
+  pull_policy: never
+  user: "${DS2_UID:-10001}:${DS2_GID:-10001}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs:
+    - /tmp:size=16m,mode=1777
+  logging:
+    driver: json-file
+    options:
+      max-size: 5m
+      max-file: "3"
+
+services:
+  server:
+    <<: *common
+    restart: unless-stopped
+    stop_grace_period: 20s
+    # This sysctl applies only to the container's isolated network namespace.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+    ports:
+      - "${BIND_IP:-0.0.0.0}:53:53/udp"
+      - "${BIND_IP:-0.0.0.0}:53:53/tcp"
+      - "${BIND_IP:-0.0.0.0}:443:443/tcp"
+      - "${BIND_IP:-0.0.0.0}:8443:8443/tcp"
+    volumes:
+      - ./config:/config:ro
+      - ./data:/data
+
+  backup:
+    <<: *common
+    command: [backup-loop]
+    restart: unless-stopped
+    stop_grace_period: 20s
+    healthcheck:
+      disable: true
+    volumes:
+      - ./data:/data
+
+  init:
+    <<: *common
+    profiles: [tools]
+    command: [init]
+    environment:
+      PUBLIC_IP: "${PUBLIC_IP:?Set PUBLIC_IP in .env or run setup.sh}"
+      DNS_UPSTREAM: "${DNS_UPSTREAM:-1.1.1.1}"
+    healthcheck:
+      disable: true
+    volumes:
+      - ./config:/config
+      - ./data:/data

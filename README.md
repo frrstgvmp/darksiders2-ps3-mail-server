@@ -40,11 +40,20 @@ Japanese and international mailboxes are separate; cross-region delivery is unve
 
 ## Hosting
 
-Requirements: Debian 13, Python 3.10+, `python3-cryptography`, systemd and a
-public IPv4 address. Open UDP/TCP **53** and TCP **443/8443**.
+Use Linux Docker Engine and Docker Compose. Open UDP/TCP **53** and TCP
+**443/8443** on the server and provider firewall.
 
-Follow [Installation](docs/INSTALL.md) to generate TLS material and install the
-service. DNS, HTTPS and SQLite storage run in one process.
+Download the [Docker bundle](https://github.com/frrstgvmp/darksiders2-ps3-mail-server/releases/download/v0.5.0/darksiders2-ps3-mail-server-0.5.0-docker-amd64.tar.gz),
+extract it and run:
+
+```bash
+./setup.sh YOUR_SERVER_IP
+```
+
+The Linux AMD64 bundle includes a prebuilt image. Setup also works from source,
+building the image locally. Configuration and keys stay in `config/`; mail,
+logs and daily backups stay in `data/`. Repeat setup preserves existing data.
+See [Installation](docs/INSTALL.md) for updates, migration and native systemd setup.
 
 The TLS chain is experimental and is not publicly trusted. A newly generated
 chain requires a console compatibility check. Preserve working keys across
