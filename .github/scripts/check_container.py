@@ -18,8 +18,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def run(*command, cwd, env):
-    result = subprocess.run(command, cwd=cwd, env=env, check=True, text=True,
+    result = subprocess.run(command, cwd=cwd, env=env, check=False, text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=180)
+    if result.returncode:
+        print(result.stdout, flush=True)
+        result.check_returncode()
     return result.stdout.strip()
 
 
@@ -115,6 +118,11 @@ def main():
             assert all(hashlib.sha256(p.read_bytes()).hexdigest() == digest for p, digest in hashes.items())
             print('PASS: non-root setup, HTTPS, localized news, auth rejection/redaction, DNS UDP/TCP, repeat init, backup and recreation persistence.', flush=True)
         except BaseException:
+            print(compose('ps', '-a'), flush=True)
+            for service in ('server', 'backup'):
+                container = compose('ps', '-a', '-q', service)
+                if container:
+                    print(run('docker', 'inspect', '--format', '{{json .State}}', container, cwd=directory, env=env), flush=True)
             print(compose('logs', '--no-color', '--tail', '100'), flush=True)
             raise
         finally:
