@@ -22,6 +22,10 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$GITHUB_REF_NAME" = "v$(cat VERSION)"; fi
       - name: Build image
         run: docker build --tag "darksiders2-ps3-mail-server:$(cat VERSION)" .
+      - name: Export prebuilt image
+        run: |
+          docker save "darksiders2-ps3-mail-server:$(cat VERSION)" | gzip > image-amd64.tar.gz
+          docker image rm "darksiders2-ps3-mail-server:$(cat VERSION)"
       - name: Check end-user deployment
         run: python3 .github/scripts/check_container.py
       - name: Assemble Docker bundle
@@ -31,7 +35,7 @@ jobs:
           mkdir -p "stage/$name" artifacts
           git archive HEAD | tar -x -C "stage/$name"
           rm -rf "stage/$name/.github"
-          docker save "darksiders2-ps3-mail-server:$version" | gzip > "stage/$name/image-amd64.tar.gz"
+          cp image-amd64.tar.gz "stage/$name/image-amd64.tar.gz"
           tar -czf "artifacts/$name.tar.gz" -C stage "$name"
           cd artifacts
           sha256sum "$name.tar.gz" > SHA256SUMS.txt

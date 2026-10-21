@@ -28,6 +28,8 @@ def main():
         directory = Path(temporary)
         for name in ('Dockerfile', 'VERSION', 'compose.yaml', 'setup.sh'):
             shutil.copy2(ROOT / name, directory / name)
+        if (ROOT / 'image-amd64.tar.gz').exists():
+            shutil.copy2(ROOT / 'image-amd64.tar.gz', directory / 'image-amd64.tar.gz')
         env = dict(os.environ, COMPOSE_PROJECT_NAME='ds2-release-check')
 
         def compose(*args):
